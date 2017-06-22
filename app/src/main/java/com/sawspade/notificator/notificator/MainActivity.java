@@ -1,16 +1,14 @@
 package com.sawspade.notificator.notificator;
 
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
+import android.Manifest;
 import android.content.*;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
@@ -18,13 +16,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.channels.FileChannel;
 
 public class MainActivity extends ActionBarActivity {
     final String LOG_TAG = "LOG_TAG";
-    Button btnShow, btnClear, btnCharge;
+    Button btnShow, btnBackUp, btnCharge;
     TextView tv;
     EditText et;
 
@@ -43,46 +40,53 @@ public class MainActivity extends ActionBarActivity {
 
 
         dbHelper = new DBHelper(this);
+        final Context ctx = this;
 
-
-        /*
-
-
-
-        btnShow.setOnClickListener(new View.OnClickListener() {
+        btnBackUp.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View arg0) {
-                //API level 11
-                Log.d("LOG", "click");
+
+                try {
+                    File sd = Environment.getExternalStorageDirectory();
+                    File data = Environment.getDataDirectory();
+                    String state = Environment.getExternalStorageState();
+
+                    int permission = ActivityCompat.checkSelfPermission(ctx, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                    if (permission != PackageManager.PERMISSION_GRANTED)
+                        System.out.println("bad");
+
+
+                    if (Environment.MEDIA_MOUNTED.equals(state)) {
+                        String currentDBPath = "/data/user/0/" + getPackageName() + "/databases/dict";
+                        String backupDBPath = "bu.db";
+                        File currentDB = new File(currentDBPath);
+                        File backupDB = new File(sd, backupDBPath);
+
+                        if (currentDB.exists()) {
+                            FileChannel src = new FileInputStream(currentDB).getChannel();
+                            //FileChannel dst = new FileOutputStream(backupDB).getChannel();
+                            FileChannel dst = new FileOutputStream("/storage/emulated/0/bu.db").getChannel();
+                            dst.transferFrom(src, 0, src.size());
+                            src.close();
+                            dst.close();
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+
+                }
 
 
 
 
 
-                stackBuilder.addParentStack(Main2Activity.class);
-                stackBuilder.addNextIntent(resultIntent);
-                PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(
-                        0,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
-                mBuilder.setContentIntent(resultPendingIntent);
-                NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                int mId = 1000303;
-                mNotificationManager.notify(mId, mBuilder.build());
 
 
-            }
-        });
 
 
-*/
-        btnClear.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View arg0) {
-                //manager.cancel(11);
 
-                String search = et.getText().toString();
-                String answer = get_sql(search.toLowerCase());
-                Log.d(LOG_TAG, "answer = " + answer);
-                tv.setText(answer);
+
+
+
 
             }
         });
@@ -101,8 +105,8 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void initialise() {
-        btnShow = (Button) findViewById(R.id.btnShowNotification);
-        btnClear = (Button) findViewById(R.id.btnClearNotification);
+        //btnShow = (Button) findViewById(R.id.btnShowNotification);
+        btnBackUp = (Button) findViewById(R.id.btnBackUp);
         btnCharge = (Button) findViewById(R.id.btnCharrge);
         et = (EditText) findViewById(R.id.editText2);
         tv = (TextView) findViewById(R.id.textView2);

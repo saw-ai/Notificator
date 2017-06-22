@@ -13,10 +13,10 @@
 
 
 
-    <Button android:id="@+id/btnShowNotification"
+    <Button android:id="@+id/btnBackUp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="photo">
+            android:text="BACK UP">
     </Button>
 
     <EditText
@@ -47,7 +47,7 @@
     <Button android:id="@+id/btnCharrge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="memory"
+            android:text="charge"
             android:elevation="23dp"
             android:layout_alignParentTop="true" android:layout_centerHorizontal="true">
     </Button>
